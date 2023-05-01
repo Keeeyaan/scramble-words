@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { socket } from '../../connections/socket';
 
 import GameChatBar from './GameSideBar';
@@ -17,6 +17,7 @@ const Game = ({ playerName }: GameProps) => {
 
   const connectedRef = useRef(true);
   const { gameId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     socket.open();
@@ -36,15 +37,24 @@ const Game = ({ playerName }: GameProps) => {
     const handleMessageReceived = (message: any) => {
       setMessages((prevMessage) => [...prevMessage, message]);
     };
+    
     const handlePlayerJoined = (data: { players: string[] }) => {
       setPlayers(data.players);
     };
+
+    const handleRoomNotFound = (status: string) => {
+      console.log(status)
+      navigate('/')
+    };
+
     socket.on('recieve-message', handleMessageReceived);
     socket.on('player-joined', handlePlayerJoined);
-
+    socket.on('room-not-found', handleRoomNotFound)
+    
     return () => {
       socket.off('recieve-message', handleMessageReceived);
       socket.off('player-joined', handlePlayerJoined);
+      socket.off('room-not-found', handleRoomNotFound)
     };
   }, [socket]);
 
