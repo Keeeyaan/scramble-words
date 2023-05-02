@@ -38,7 +38,11 @@ const GameSideBar = ({ playerName, messages, setMessages }: any) => {
             {messages.map((message: any) => {
               return (
                 <p
-                  className={`${message.name === 'BOT' ? 'text-yellow-200' : 'text-slate-200'}`}
+                  className={`${
+                    message.name === 'BOT'
+                      ? 'text-yellow-200'
+                      : 'text-slate-200'
+                  }`}
                   key={message.id}
                 >{`${message.name}: ${message.message}`}</p>
               );
