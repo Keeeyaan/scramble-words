@@ -14,6 +14,7 @@ const Game = ({ playerName }: GameProps) => {
     { message: string; name: string; id: string }[]
   >([]);
   const [players, setPlayers] = useState<string[]>([]);
+  const [host, setHost] = useState(false);
 
   const connectedRef = useRef(true);
   const { gameId } = useParams();
@@ -47,14 +48,20 @@ const Game = ({ playerName }: GameProps) => {
       navigate('/');
     };
 
+    const handleHost = () => {
+      setHost(true);
+    };
+
     socket.on('recieve-message', handleMessageReceived);
     socket.on('player-joined', handlePlayerJoined);
     socket.on('room-not-found', handleRoomNotFound);
+    socket.on('host', handleHost);
 
     return () => {
       socket.off('recieve-message', handleMessageReceived);
       socket.off('player-joined', handlePlayerJoined);
       socket.off('room-not-found', handleRoomNotFound);
+      socket.off('host', handleHost);
     };
   }, [socket]);
 
@@ -62,7 +69,7 @@ const Game = ({ playerName }: GameProps) => {
     <>
       <div className="h-screen w-full flex justify-between">
         <div className="w-full h-screen relative">
-          <GameBody players={players} />
+          <GameBody players={players} host={host} />
         </div>
         <GameChatBar
           playerName={playerName}
