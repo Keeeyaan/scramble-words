@@ -14,7 +14,8 @@ const Game = ({ playerName }: GameProps) => {
     { message: string; name: string; id: string }[]
   >([]);
   const [players, setPlayers] = useState<string[]>([]);
-  const [host, setHost] = useState(false);
+  const [host, setHost] = useState('');
+  const [isHost, setIsHost] = useState(false);
 
   const connectedRef = useRef(true);
   const { gameId } = useParams();
@@ -30,6 +31,8 @@ const Game = ({ playerName }: GameProps) => {
 
     return () => {
       socket.off('recieve-message');
+      socket.off('player-joined');
+      socket.off('host');
       socket.close();
     };
   }, [gameId, playerName]);
@@ -39,7 +42,7 @@ const Game = ({ playerName }: GameProps) => {
       setMessages((prevMessage) => [...prevMessage, message]);
     };
 
-    const handlePlayerJoined = (data: { players: string[] }) => {
+    const handlePlayerJoined = (data: { players: string[]}) => {
       setPlayers(data.players);
     };
 
@@ -48,8 +51,9 @@ const Game = ({ playerName }: GameProps) => {
       navigate('/');
     };
 
-    const handleHost = () => {
-      setHost(true);
+    const handleHost = (newHost: string) => {
+      setHost(newHost);
+      setIsHost(newHost === socket.id);
     };
 
     socket.on('recieve-message', handleMessageReceived);
@@ -69,7 +73,7 @@ const Game = ({ playerName }: GameProps) => {
     <>
       <div className="h-screen w-full flex justify-between">
         <div className="w-full h-screen relative">
-          <GameBody players={players} host={host} />
+          <GameBody players={players} host={host} isHost={isHost} />
         </div>
         <GameChatBar
           playerName={playerName}
