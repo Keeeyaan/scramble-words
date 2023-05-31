@@ -1,5 +1,8 @@
-import ScrambleGame from './ScrambleGame';
+import { useState } from 'react';
 import { socket } from '../../connections/socket';
+
+import ScrambleGame from './ScrambleGame';
+import { useTimer } from '../../hooks/useTimer';
 
 const GameBody = ({
   players,
@@ -10,12 +13,24 @@ const GameBody = ({
   isHost: boolean;
   host: string;
 }) => {
+  const [startCountdown, setStartCountdown] = useState(false);
   const totalPlayers = players.length;
   const radius = 120 + 10 * (totalPlayers - 1);
   const angle = 360 / totalPlayers; // Angle between each player
 
+  const { seconds } = useTimer({
+    startTime: 10,
+    startCountdown: startCountdown,
+  });
   return (
     <>
+      {seconds > 0 && startCountdown && (
+        <div className="w-full bg-green-500 h-18 flex items-center justify-center p-4">
+          <p className="text-white text-xl font-bold">
+            Game Starting: {seconds}
+          </p>
+        </div>
+      )}
       {players.map((player, index) => {
         const rotateAngle = angle * index;
         const translateX = Math.cos((rotateAngle * Math.PI) / 180) * radius;
@@ -36,13 +51,19 @@ const GameBody = ({
           </div>
         );
       })}
-      {isHost && socket.id === host && players.length > 1 && (
-        <div className="flex justify-center m-5">
-          <button className="py-2 px-4 bg-green-400 text-white  font-bold rounded">
-            Start
-          </button>
-        </div>
-      )}
+      {isHost &&
+        socket.id === host &&
+        players.length > 1 &&
+        !startCountdown && (
+          <div className="flex justify-center m-5">
+            <button
+              onClick={() => setStartCountdown(true)}
+              className="py-2 px-4 bg-green-400 text-white  font-bold rounded"
+            >
+              Start
+            </button>
+          </div>
+        )}
     </>
   );
 };
