@@ -3,12 +3,12 @@ import { useState, useEffect, useRef } from 'react';
 type Timer = {
   seconds: number;
   minutes: number;
-}
+};
 
 type UseTimerProps = {
   startTime: number;
   startCountdown: boolean;
-}
+};
 
 export const useTimer = ({ startTime, startCountdown }: UseTimerProps) => {
   const [timer, setTimer] = useState<Timer>({

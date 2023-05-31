@@ -42,7 +42,7 @@ const Game = ({ playerName }: GameProps) => {
       setMessages((prevMessage) => [...prevMessage, message]);
     };
 
-    const handlePlayerJoined = (data: { players: string[]}) => {
+    const handlePlayerJoined = (data: { players: string[] }) => {
       setPlayers(data.players);
     };
 
