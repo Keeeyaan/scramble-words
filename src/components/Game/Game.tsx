@@ -73,7 +73,12 @@ const Game = ({ playerName }: GameProps) => {
     <>
       <div className="h-screen w-full flex justify-between">
         <div className="w-full h-screen relative">
-          <GameBody players={players} host={host} isHost={isHost} />
+          <GameBody
+            players={players}
+            host={host}
+            gameId={gameId}
+            isHost={isHost}
+          />
         </div>
         <GameChatBar
           playerName={playerName}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { socket } from '../../connections/socket';
 
 import ScrambleGame from './ScrambleGame';
@@ -8,12 +8,16 @@ const GameBody = ({
   players,
   isHost,
   host,
+  gameId,
 }: {
   players: string[];
   isHost: boolean;
   host: string;
+  gameId?: string;
 }) => {
   const [startCountdown, setStartCountdown] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+
   const totalPlayers = players.length;
   const radius = 120 + 10 * (totalPlayers - 1);
   const angle = 360 / totalPlayers; // Angle between each player
@@ -22,6 +26,27 @@ const GameBody = ({
     startTime: 10,
     startCountdown: startCountdown,
   });
+
+  useEffect(() => {
+    if (startCountdown) {
+      socket.emit('start-game-countdown', { duration: seconds, gameId });
+    }
+  }, [startCountdown, seconds]);
+
+  useEffect(() => {
+    const handleCountdownReceived = ({ duration, startCountdown }: any) => {
+      console.log(duration);
+      setStartCountdown(startCountdown);
+      if (duration === 0) {
+        setGameStarted(true);
+      }
+    };
+    socket.on('recieve-start-game-countdown', handleCountdownReceived);
+    return () => {
+      socket.off('recieve-start-game-countdown', handleCountdownReceived);
+    };
+  }, []);
+
   return (
     <>
       {seconds > 0 && startCountdown && (
@@ -51,6 +76,7 @@ const GameBody = ({
           </div>
         );
       })}
+      {gameStarted && <ScrambleGame />}
       {isHost &&
         socket.id === host &&
         players.length > 1 &&
