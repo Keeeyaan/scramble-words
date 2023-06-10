@@ -13,7 +13,9 @@ const Game = ({ playerName }: GameProps) => {
   const [messages, setMessages] = useState<
     { message: string; name: string; id: string }[]
   >([]);
-  const [players, setPlayers] = useState<string[]>([]);
+  const [players, setPlayers] = useState<
+    { id: string; name: string; lives: number }[]
+  >([]);
   const [host, setHost] = useState('');
   const [isHost, setIsHost] = useState(false);
 
@@ -42,8 +44,10 @@ const Game = ({ playerName }: GameProps) => {
       setMessages((prevMessage) => [...prevMessage, message]);
     };
 
-    const handlePlayerJoined = (data: { players: string[] }) => {
-      setPlayers(data.players);
+    const handlePlayerJoined = (
+      players: { id: string; name: string; lives: number }[]
+    ) => {
+      setPlayers(players);
     };
 
     const handleRoomNotFound = (status: string) => {
