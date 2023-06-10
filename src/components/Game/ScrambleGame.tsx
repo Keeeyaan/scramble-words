@@ -1,6 +1,6 @@
 import { useState, useEffect, SetStateAction } from 'react';
 
-const ScrambleGame = () => {
+const ScrambleGame = ({ handleTurnComplete }: any) => {
   const [scrambledWord, setScrambledWord] = useState('');
   const [originalWord, setOriginalWord] = useState('');
   const [userInput, setUserInput] = useState('');
@@ -27,6 +27,7 @@ const ScrambleGame = () => {
     if (userInput === originalWord) {
       fetchRandomWord();
     }
+    handleTurnComplete();
     setUserInput('');
   };
 

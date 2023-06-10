@@ -10,13 +10,14 @@ const GameBody = ({
   host,
   gameId,
 }: {
-  players: string[];
+  players: { id: string; name: string; lives: number }[];
   isHost: boolean;
   host: string;
   gameId?: string;
 }) => {
   const [startCountdown, setStartCountdown] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [currentPlayer, setCurrentPlayer] = useState('');
 
   const totalPlayers = players.length;
   const radius = 120 + 10 * (totalPlayers - 1);
@@ -38,14 +39,34 @@ const GameBody = ({
       console.log(duration);
       setStartCountdown(startCountdown);
       if (duration === 0) {
-        setGameStarted(true);
+        socket.emit('game-start', gameId);
       }
     };
+
+    const handleGameStartReceived = ({ gameStarted, initialPlayer }: any) => {
+      setGameStarted(gameStarted);
+      setCurrentPlayer(initialPlayer);
+    };
+
+    const handleTurnChange = ({ nextPlayer }: { nextPlayer: string }) => {
+      console.log(nextPlayer);
+      setCurrentPlayer(nextPlayer);
+    };
+
     socket.on('recieve-start-game-countdown', handleCountdownReceived);
+    socket.on('recieve-game-start', handleGameStartReceived);
+    socket.on('recieve-next-turn', handleTurnChange);
+
     return () => {
       socket.off('recieve-start-game-countdown', handleCountdownReceived);
+      socket.off('recieve-game-start', handleGameStartReceived);
+      socket.off('recieve-next-turn', handleTurnChange);
     };
   }, []);
+
+  const handleTurnComplete = () => {
+    socket.emit('turn-complete', gameId);
+  };
 
   return (
     <>
@@ -62,7 +83,7 @@ const GameBody = ({
         const translateY = Math.sin((rotateAngle * Math.PI) / 180) * radius;
         return (
           <div
-            key={player}
+            key={player.name}
             style={{
               transform: `translate(${translateX}px, ${translateY}px)`,
             }}
@@ -71,12 +92,14 @@ const GameBody = ({
             <div
               className={`w-20 h-20 rounded-full bg-gray-300 flex justify-center items-center text-center`}
             >
-              <h1 className="text-md font-bold text-gray-800">{player}</h1>
+              <h1 className="text-md font-bold text-gray-800">{player.name}</h1>
             </div>
           </div>
         );
       })}
-      {gameStarted && <ScrambleGame />}
+      {gameStarted && currentPlayer === socket.id && (
+        <ScrambleGame handleTurnComplete={handleTurnComplete} />
+      )}
       {isHost &&
         socket.id === host &&
         players.length > 1 &&
